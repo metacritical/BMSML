@@ -1,4 +1,5 @@
 //Define Color codes
+
 #define BASH_NRM  "\x1B[0m"
 #define BASH_RED  "\x1B[31m"
 #define BASH_GRN  "\x1B[32m"
@@ -10,5 +11,5 @@
 
 //Color print function
 cprint(char* input_str, char* color){
-	printf("%s%s%s",color, input_str, BASH_NRM);
+    printf("%s%s%s",color, input_str, BASH_NRM);
 }
