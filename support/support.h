@@ -6,12 +6,13 @@
 #endif
 
 //Custom Inclusions
-#include "bender_ascii.h"
+#include "bender_ascii.h" /* Bender Ascii at repl. */
 #include "color.h" /* Color Header*/
-#include "prompt.h"
+#include "prompt.h" /* Repl Prompt Routines. */
 #include "parser.h"
 
 
+//Print Bender Banner in repl.
 void print_banner(){
   char msg[] =
     "Press Ctrl+C or type (exit)"

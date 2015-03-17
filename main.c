@@ -6,7 +6,6 @@
 int main(int argc, char** argv) {
     print_banner();
 
-    static char delim[] = "+-*/^";
     /* Repl Loop Starts Here */
     while( true ) {
         char* line = (char *)readline(prompt);
