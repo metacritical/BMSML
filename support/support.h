@@ -2,27 +2,22 @@
 #include <editline/readline.h>
 #elif __gnu_linux__
 #include <readline/readline.h>
+#include <readline/history.h>
 #endif
 
 //Custom Inclusions
 #include "bender_ascii.h"
 #include "color.h" /* Color Header*/
+#include "prompt.h"
+#include "parser.h"
 
-//prompt ≺≻
-//Increment Repl prompt line count.
-char prompt[] = "\n[0]≻ ";
-int repl_line_count = 0;
 
-incr_prompt(){
-    repl_line_count += 1;
-    sprintf(prompt,"\n[%d]≻ ", repl_line_count);
-    return(0);
-}
+void print_banner(){
+  char msg[] =
+    "Press Ctrl+C or type (exit)"
+    "to exit this infinite rat hole :P\n";
 
-//Experimental Test Code.
-test_func(char* input){
-    while (*input){
-        printf("This : %c\n",*input);
-        *input++;
-    }
+    cprint(ascii_art, BASH_YEL);
+    cprint("BMSML Version 0.0.1\n", BASH_RED);
+    cprint(msg, BASH_CYN);
 }

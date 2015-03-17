@@ -4,29 +4,29 @@
 #include "support/support.h"
 
 int main(int argc, char** argv) {
-    cprint(ascii_art, BASH_YEL);
-    cprint("BMSML Version 0.0.1\n", BASH_RED);
-    cprint("Press Ctrl+C or type (exit) to come out of this infinite rat hole :P\n", BASH_CYN);
+    print_banner();
 
     static char delim[] = "+-*/^";
     /* Repl Loop Starts Here */
     while( true ) {
-        char* line = readline(prompt);
+        char* line = (char *)readline(prompt);
 
         if ( !strcmp( line , "(exit)" ) ){
             puts("Bye.");
             break;
         }else{
             cprint("You typed : ", BASH_RED);
-            printf("%s", (char *)line);
-            test_func(line);
+            printf("%s", line);
+            parse_list(line);
         }
 
+        //add the expression to history and increment prompt
         add_history(line);
-        incr_prompt();
+        increment_prompt();
 
         //since line returns is allocated with malloc();
-        //the caller should free() the line when it has finished with it.
+        //the caller should free() the line when it is finished with it.
         free(line);
     }
+    return 0;
 }

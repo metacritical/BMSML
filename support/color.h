@@ -10,6 +10,6 @@
 #define BASH_WHT  "\x1B[37m"
 
 //Color print function
-cprint(char* input_str, char* color){
+void cprint(char* input_str, char* color){
     printf("%s%s%s",color, input_str, BASH_NRM);
 }
