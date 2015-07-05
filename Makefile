@@ -3,7 +3,6 @@
 #
 
 print-%: ; @echo $*=$($*)
-
 CC=clang
 CFLAGS=-Wall -O2
 #CFLAGS+=-ansi -pedantic -std=c++11
@@ -14,5 +13,6 @@ OUTPUT=bmsml
 
 grab: main.c
 	$(CC) $< $(CFLAGS) $(LIBS)  -o $(OUTPUT)
-run:
+run: main.c
+	$(CC) $< $(LIBS)  -o $(OUTPUT)
 	./$(OUTPUT)
