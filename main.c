@@ -10,15 +10,16 @@ int main(int argc, char** argv) {
     while( true ) {
         char* line = (char *)readline(prompt);
 
-        if ( !strcmp( line , "(exit)" ) ){
-            puts("Bye.");
+        if(*line == '\0') continue;
+
+        if ( !strcmp( line , "(exit)" ) || !strcmp( line , "(quit)")){
+            puts("Andu-falah-dor!"); //Darnassian for 'Let Balance be restored!'
             break;
         }else{
-            cprint("You typed : ", BASH_RED);
-            printf("%s", line);
-            parse_list(line);
-        }
+            cprint("⇒ ", BASH_RED);
+            print(eval(parse(line)));
 
+        }
         //add the expression to history and increment prompt
         add_history(line);
         increment_prompt();
