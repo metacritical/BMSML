@@ -1,3 +1,4 @@
+#include <stdbool.h>
 #include <ctype.h>
 #include "utils.h"
 
@@ -34,37 +35,70 @@ Object *make_atom_from_string(char *c, char type){
         }while(isdigit(*c));
     }
 
+
     //Print Number.
     if(Arry->type == 'i'){
         return createInteger(array_to_int(Arry));
     }else if(Arry->type == 'f'){
         return createFraction(array_to_float(Arry));
     }else return nullObject();
+
+}
+
+Object *makeList(char *tok){
+    while(*tok == ' ')
+        ++tok;
+
+    if(*tok == ')'){
+        return emptyList();
+    }
+
+    return emptyList();
 }
 
 //Generates AST.
 Object *parse(char* input){
     char *tok = input;
+
     if(*tok == '\0') return nullObject();
 
-    if(*input == ' '){ //Skip spaces
-        parse(++tok);
-    }else if( (*tok == '-' && isdigit(*(tok+1)) ) || isdigit(*tok) ){ //
+    if( (*tok == '-' && isdigit(*(tok+1)) ) || isdigit(*tok) ){ //
         return make_atom_from_string(tok, 'i');
+    }else if( *tok  == '#'){
+        //If the char starts with a #, then it is a boolean
+        //Create a true or false object. These are singletons or Atomss.
+            ++tok;
+            switch(*tok){
+            case 't': return boolObject(true); break;
+            case 'f': return boolObject(false); break;
+            default:
+                printf("God Knows if it is Boolean");
+                exit(1);
+            }
+    }else if( *tok == '(' ){
+        return makeList(++tok);
     }
 
     return parse(++tok);
 }
 
-Object *eval(Object *expression){
-    return expression;
+Object *eval(Object *exprn){
+    if(exprn->type == Cons){
+        if(exprn->Data.cell->car->type == NIL && exprn->Data.cell->cdr->type == NIL)
+            return nullObject();
+    }
+
+    return exprn;
 }
 
 void print(Object *result){
-    if(result->type == Integer)
-        printf("%ld", result->Data.atom.integer.val);
-    else if(result->type == Fraction)
-        printf("%lf", result->Data.atom.fraction.val);
-    else if(result->type == NIL && result->Data.atom.nil.val == NULL)
-        printf("nil");
+    switch(result->type){
+
+    case Integer  : printf("%ld", result->Data.atom.integer.val); break;
+    case Fraction : printf("%lf", result->Data.atom.fraction.val); break;
+    case Boolean  : result->Data.atom.boolean.val ? puts("#t") : puts("#f"); break;
+    case NIL      : puts("nil"); break;
+    default       : puts("\n"); break;
+    }
+
 }

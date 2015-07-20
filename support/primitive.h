@@ -28,7 +28,7 @@ typedef struct Object{
     int line_number;
     int char_at;
     Type type;
-    union { Atom atom; Cell cell; } Data;
+    union { Atom atom; Cell *cell; } Data;
 } Object;
 
 
@@ -59,8 +59,34 @@ Object *createFraction(double frac) {
     return this;
 };
 
+Object *boolObject(bool val){
+    Object *this = createObject();
+    this->type = Boolean;
+    this->Data.atom.boolean.val = val;
+    return this;
+}
 
-Cell *createList(Object *first, Object *rest){
+//Creates Empty Cell.
+Cell *createCell(void){
     Cell *this = malloc(sizeof(Cell));
+
+    this->car = malloc(sizeof(Object));
+    this->cdr = malloc(sizeof(Object));
+    //Set car as nil.
+    this->car->type = NIL;
+    this->car->Data.atom.nil.val = NULL;
+
+    //Set cdr as nil.
+    this->cdr->type = NIL;
+    this->cdr->Data.atom.nil.val = NULL;
+
+    return this;
+}
+
+
+Object *emptyList(void){
+    Object *this = malloc(sizeof(Object));
+    this->type = Cons;
+    this->Data.cell = createCell();
     return this;
 }

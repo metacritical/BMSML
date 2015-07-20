@@ -67,16 +67,14 @@ void expand_array(Array *array){
 }
 
 
-void free_Array(Array *array){
+void free_array(Array *array){
     free(array->char_array);
     array = NULL;
     assert(array == NULL);
 }
 
 Array *insert_into_array(Array *this, char elem){
-    if(this->size >= this->capacity){
-        expand_array(this);
-    }
+    if(this->size >= this->capacity){ expand_array(this); }
 
     this->char_array[this->size] = elem;
     this->size++;
@@ -94,14 +92,14 @@ long int array_to_int(Array *arry){
         number = (number * 10) + (arry->char_array[i] - '0');
     }
 
-    free_Array(arry);
+    free_array(arry);
     return sign * number;
 }
 
 double array_to_float(Array *arry){
     int sign = arry->signedness;
     double fraction = atof(arry->char_array);
-    free_Array(arry);
+    free_array(arry);
     return sign * fraction;
 }
 
