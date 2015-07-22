@@ -66,6 +66,20 @@ Object *boolObject(bool val){
     return this;
 }
 
+Object *createString(char *str){
+    Object *this = createObject();
+    this->type = String;
+    this->Data.atom.string.val = str;
+    return this;
+}
+
+Object *createSymbol(char *str){
+    Object *this = createObject();
+    this->type = Symbol;
+    this->Data.atom.symbol.val = str;
+    return this;
+}
+
 //Creates Empty Cell.
 Cell *createCell(void){
     Cell *this = malloc(sizeof(Cell));
@@ -83,7 +97,7 @@ Cell *createCell(void){
     return this;
 }
 
-
+//Creates an empty list which containing a null pointing cell.
 Object *emptyList(void){
     Object *this = malloc(sizeof(Object));
     this->type = Cons;

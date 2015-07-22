@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "primitive.h"
 
 char *type_of_token(int t){
@@ -38,25 +39,18 @@ typedef struct {
     int capacity;
     int signedness;
     int _expand_capacity;
-    char type;
+    Type type;
     char *char_array;
 }Array;
 
-Array *create_array(Array *this, int capacity, char type){
+Array *create_array(Array *this, int capacity, Type type){
     this->size = 0;
     this->capacity = capacity;
     this->_expand_capacity = capacity;
     this->char_array = calloc(this->capacity, sizeof(char) );
 
-    switch(type){
-    case 'i':
-        this->type = 'i';
-        this->signedness = POSITIVE;
-        break;
-    case 'c':
-        this->type = 'c';
-        break;
-    }
+    this->type = type;
+    if(type == Integer) this->signedness = POSITIVE;
 
     return this;
 }
@@ -81,8 +75,13 @@ Array *insert_into_array(Array *this, char elem){
     return this;
 }
 
+Array *set_value_at_array(Array *arry, int *pos , char *val){
+    arry->char_array[(int)pos] = (int)val;
+    return arry;
+}
+
 void set_array_to_float(Array *arry){
-    arry->type = 'f';
+    arry->type = Fraction;
 }
 
 long int array_to_int(Array *arry){
@@ -98,12 +97,22 @@ long int array_to_int(Array *arry){
 
 double array_to_float(Array *arry){
     int sign = arry->signedness;
+    //TODO: atof is Not accurate, precision is lost write your own.
     double fraction = atof(arry->char_array);
     free_array(arry);
-    return sign * fraction;
+    return (float)sign * fraction;
 }
 
-Array *set_value_at_array(Array *arry, int *pos , char *val){
-    arry->char_array[(int)pos] = (int)val;
-    return arry;
+char *array_to_string(Array *arry){
+    char *str  = malloc(sizeof(char)*arry->size + 1);
+    int i = 0;
+
+    while(i <= arry->size-1){
+        str[i] = arry->char_array[i];
+        i++;
+    }
+
+    str[arry->size] = '\0';
+    free_array(arry);
+    return str;
 }
