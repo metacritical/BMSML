@@ -2,109 +2,143 @@
 #include <ctype.h>
 #include "utils.h"
 
-//Make a number or integer from a string.
-Object *make_atom(char *c, Type type){
+int paren_open = 0;
+char *tok;
+
+//Cons
+Object *cons(Object *car, Object *cdr){
+    Object *obj = createCell();
+    RPLACA(obj, car); RPLACD(obj, cdr);
+    return obj;
+}
+
+
+Object *make_number(char *ch){
     Array a;
-    Array *Arry = create_array(&a, 5, type);
+    Array *Arry = create_array(&a, 5, Integer);
 
     //Check if the char is '-', then set signedness Negative.
     //And move the pointer to the number.
-    if( type == Integer && *c == '-'){
+    if( *ch == '-'){
         Arry->signedness = NEGATIVE;
-        c++;
+        tok = ++ch;
     };
 
-    switch(type){
-        //Condition 1 : if the char is a number. then collect all numbers
-        //if a '.' is encountered set Array type as float and continue.
-    case Integer :
-        if(isdigit(*c)){
-            do{
-                insert_into_array(Arry, *c);
-                c++;
+    do{
+        insert_into_array(Arry, *ch);
+        tok = ++ch;
 
-                if(*c == '.'){
-                    Arry->type = Fraction;
-                    insert_into_array(Arry, *c);
-                    c++;
-                }
+        if(*ch == '.'){
+            set_array_to_float(Arry);
+            insert_into_array(Arry, *ch);
+            tok = ++ch;
+        }
 
-            }while(isdigit(*c));
-        } break;
+    }while(isdigit(*ch));
 
-        //Condition 2: If the char starts with a " then it is probably a string.
-    case String : do{
-            insert_into_array(Arry, *c);
-            ++c;
-        }while(*c != '\0');
-
-        break;
-
-    case Symbol : while(*c != ' ' || *c != '\0' || *c != ')'){
-            insert_into_array(Arry, *c);
-            ++c;
-        } break;
-
-
-    default : return nullObject(); break;
-    }
-
-    //Make the appropriate kind of atom.
-    switch(Arry->type){
-    case Integer  : return createInteger(array_to_int(Arry));    break;
-    case Fraction : return createFraction(array_to_float(Arry)); break;
-    case String   : return createString(array_to_string(Arry));  break;
-    case Symbol   : return createSymbol(array_to_string(Arry));  break;
-    default : return nullObject(); break;
-    }
-
+    if(Arry->type == Integer)
+        return createInteger(array_to_int(Arry));
+    else
+        return createFraction(array_to_float(Arry));
 }
 
-Object *makeList(char *tok){
-    while(*tok == ' ')
-        ++tok;
-    //Check if it is a non empty list.
-    if(*tok == ')'){
-        return emptyList();
-    }else{
-        Object *list = emptyList();
-        return list;
+
+Object *make_string(char *ch){
+    Array a;
+    Array *Arry = create_array(&a, 5, String);
+
+    do{
+        insert_into_array(Arry, *ch);
+        ++ch;
+    }while(*ch != '"');
+
+    tok = ++ch;
+
+    return createString(array_to_string(Arry));
+}
+
+
+Object *make_boolean(char *ch){
+    //If the char starts with a #, then it is a boolean
+    //Create a true or false object. These are singletons or Atomss.
+    tok = ++ch;
+    switch(*ch){
+    case 't': return boolObject(true); break;
+    case 'f': return boolObject(false); break;
+    default:
+        puts("God Knows if it is a Boolean");
+        exit(1);
     }
+}
+
+
+Object *make_symbol(char *ch){
+    Array a;
+    Array *Arry = create_array(&a, 5, Symbol);
+
+    //Skip '('.
+    tok = ++ch;
+
+    while(*ch != ')'){
+        insert_into_array(Arry, *ch);
+        tok = ++ch;
+    }
+
+    return createSymbol(array_to_string(Arry));
+}
+
+
+Object *make_list(char *ch){
+    if(*ch == '('){ ++ch; tok = ch;}
+
+    while(*ch == ' '){
+        tok = ++ch;
+    }
+
+    if(*ch == ')') return nullObject();
+
+    Object *car = parse(ch);
+
+    while(*ch == ' '){
+        tok = ++ch;
+    }
+
+    Object *cdr = make_list(tok);
+
+    return cons(car, cdr);
 }
 
 
 //Generates AST.
-Object *parse(char* input){
-    char *tok = input;
+Object *parse(char* ch){
+    tok = ch;
 
-    if(*tok == '\0') return nullObject();
-
-    if( (*tok == '-' && isdigit(*(tok+1)) ) || isdigit(*tok) ){ //
-        return make_atom(tok, Integer);
-    }else if( *tok  == '#'){
-        //If the char starts with a #, then it is a boolean
-        //Create a true or false object. These are singletons or Atomss.
-            ++tok;
-            switch(*tok){
-            case 't': return boolObject(true); break;
-            case 'f': return boolObject(false); break;
-            default:
-                printf("God Knows if it is Boolean");
-                exit(1);
-            }
-    }else if(*tok == '"'){
-        return make_atom(tok, String);
-    }else if( *tok == '(' ){
-        return makeList(++tok);
+    while(*ch == ' '){
+        tok = ++ch;
     }
 
-    return parse(++tok);
+    //Return NIL if ')' or EOF is encountered.
+    if(*ch == ')' || *ch == '\0') return nullObject();
+
+    if( isdigit(*ch)){
+        return make_number(ch);
+    }else if( *ch  == '#' ){
+        return make_boolean(ch);
+    }else if(*ch == '"'){
+        return make_string(ch);
+    }else if(*ch == '('){
+        return make_list(ch);
+    }else{
+        return parse(++ch);
+    }
 }
 
+
+//Evaluation Code.
 Object *eval(Object *exprn){
+    printf("\nExpression Type : %s\n", type_of_token(exprn->type));
     if(exprn->type == Cons){
-        Cell *cell = exprn->Data.cell;
-        if(cell->car->type == NIL && cell->cdr->type == NIL)
+        if(CAR(exprn)->type == NIL && CDR(exprn)->type == NIL)
             return nullObject();
     }
 
@@ -114,11 +148,15 @@ Object *eval(Object *exprn){
 void print(Object *result){
     switch(result->type){
 
-    case Integer  : printf("%ld", result->Data.atom.integer.val); break;
-    case Fraction : printf("%lf", result->Data.atom.fraction.val); break;
-    case Boolean  : result->Data.atom.boolean.val ? puts("#t") : puts("#f"); break;
-    case NIL      : puts("nil"); break;
-    case String   : puts(result->Data.atom.string.val); break;
+    case Integer  : printf("Int is %ld\n", result->Val.integer); break;
+    case Fraction : printf("Fraction is %lf\n", result->Val.fraction); break;
+    case Boolean  : result->Val.boolean ? puts("#t") : puts("#f"); break;
+    case NIL      : puts("\nnil"); break;
+    case String   : puts(result->Val.string); break;
+    case Cons     :
+        print(CAR(result));
+        print(CDR(result));
+        break;
     default       : puts("\n"); break;
     }
 

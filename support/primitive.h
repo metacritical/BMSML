@@ -8,29 +8,30 @@
 //Defining Token types in lisp
 typedef enum { NIL, Integer, Fraction, String, Boolean, Symbol, Cons } Type;
 
-typedef union Atom {
-    struct { long int val; } integer;
-    struct { double val; } fraction;
-    struct { bool val; } boolean;
-    struct { char *val; } string;
-    struct { char *val; } symbol;
-    struct { int *val; } nil;
-} Atom;
-
-
-typedef struct ConsCell {
-    struct Object *car;
-    struct Object *cdr;
-} Cell;
-
-
 typedef struct Object{
     int line_number;
     int char_at;
     Type type;
-    union { Atom atom; Cell *cell; } Data;
+    union {
+        long int integer;
+        double fraction;
+        bool boolean;
+        char *string;
+        char *symbol;
+        int *nil;
+        struct {
+            struct Object *car;
+            struct Object *cdr;
+        } Cell;
+    } Val;
 } Object;
 
+/* CAR , CDR, RPLACA, RPLACD */
+#define CAR(O) O->Val.Cell.car
+#define CDR(O) O->Val.Cell.cdr
+//http://www.lispworks.com/documentation/HyperSpec/Body/f_rplaca.htm
+#define RPLACA(O, A) CAR(O) = A //replace CAR
+#define RPLACD(O, D) CDR(O) = D //replace CDR
 
 Object *createObject(void){
     Object *this = malloc(sizeof(Object));
@@ -38,69 +39,59 @@ Object *createObject(void){
     return this;
 }
 
+//Creates Empty Cell is a Object with car-cdr initialized.
 Object *nullObject(void){
     Object *this = createObject();
     this->type = NIL;
-    this->Data.atom.nil.val = NULL;
+    this->Val.Cell.car = malloc(sizeof(Object));
+    this->Val.Cell.cdr = malloc(sizeof(Object));
+    this->Val.Cell.car->type = NIL;
+    this->Val.Cell.cdr->type = NIL;
+    this->Val.Cell.car->Val.nil = NULL;
+    this->Val.Cell.cdr->Val.nil = NULL;
+
     return this;
 }
 
+//Empty Cell
+Object *createCell(void) {
+    Object *this = nullObject();
+    this->type = Cons;
+    return this;
+};
+
+//Creates an empty list which containing a null pointing cell.
 Object *createInteger(long int numb) {
     Object *this = createObject();
     this->type = Integer;
-    this->Data.atom.integer.val = numb;
+    this->Val.integer = numb;
     return this;
 };
 
 Object *createFraction(double frac) {
     Object *this = createObject();
     this->type = Fraction;
-    this->Data.atom.fraction.val = frac;
+    this->Val.fraction = frac;
     return this;
 };
 
 Object *boolObject(bool val){
     Object *this = createObject();
     this->type = Boolean;
-    this->Data.atom.boolean.val = val;
+    this->Val.boolean = val;
     return this;
 }
 
 Object *createString(char *str){
-    Object *this = createObject();
+    Object *this = createCell();
     this->type = String;
-    this->Data.atom.string.val = str;
+    this->Val.string = str;
     return this;
 }
 
-Object *createSymbol(char *str){
-    Object *this = createObject();
+Object *createSymbol(char *sym){
+    Object *this = createCell();
     this->type = Symbol;
-    this->Data.atom.symbol.val = str;
-    return this;
-}
-
-//Creates Empty Cell.
-Cell *createCell(void){
-    Cell *this = malloc(sizeof(Cell));
-
-    this->car = malloc(sizeof(Object));
-    this->cdr = malloc(sizeof(Object));
-    //Set car as nil.
-    this->car->type = NIL;
-    this->car->Data.atom.nil.val = NULL;
-
-    //Set cdr as nil.
-    this->cdr->type = NIL;
-    this->cdr->Data.atom.nil.val = NULL;
-
-    return this;
-}
-
-//Creates an empty list which containing a null pointing cell.
-Object *emptyList(void){
-    Object *this = malloc(sizeof(Object));
-    this->type = Cons;
-    this->Data.cell = createCell();
+    this->Val.symbol = sym;
     return this;
 }

@@ -3,29 +3,31 @@
 #include <string.h>
 #include "primitive.h"
 
-char *type_of_token(int t){
+Object *parse(char* input);
+
+char *type_of_token(Type t){
     char *type;
 
     switch( t ){
-    case 0:
+    case NIL:
         type = "NIL";
         break;
-    case 1:
+    case Integer:
         type = "Integer";
         break;
-    case 2:
+    case Fraction:
         type = "Fraction";
         break;
-    case 3:
+    case String:
         type = "String";
         break;
-    case 4:
+    case Boolean:
         type = "Boolean";
         break;
-    case 5:
+    case Symbol:
         type = "Symbol";
         break;
-    case 6:
+    case Cons:
         type = "Cons";
         break;
     }
@@ -100,11 +102,11 @@ double array_to_float(Array *arry){
     //TODO: atof is Not accurate, precision is lost write your own.
     double fraction = atof(arry->char_array);
     free_array(arry);
-    return (float)sign * fraction;
+    return (double)sign * fraction;
 }
 
 char *array_to_string(Array *arry){
-    char *str  = malloc(sizeof(char)*arry->size + 1);
+    char *str  = malloc(sizeof(char)*arry->size + 2);
     int i = 0;
 
     while(i <= arry->size-1){
@@ -112,7 +114,8 @@ char *array_to_string(Array *arry){
         i++;
     }
 
-    str[arry->size] = '\0';
+    str[arry->size] = '"';
+    str[arry->size+1] = '\0';
     free_array(arry);
     return str;
 }
