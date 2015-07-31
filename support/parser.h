@@ -3,7 +3,7 @@
 #include "utils.h"
 
 int paren_open = 0;
-char *tok;
+char *tok; //The global pointer to keep track of where we are on the paper tape.
 
 //Cons
 Object *cons(Object *car, Object *cdr){
@@ -11,7 +11,6 @@ Object *cons(Object *car, Object *cdr){
     RPLACA(obj, car); RPLACD(obj, cdr);
     return obj;
 }
-
 
 Object *make_number(char *ch){
     Array a;
@@ -76,16 +75,15 @@ Object *make_symbol(char *ch){
     Array a;
     Array *Arry = create_array(&a, 5, Symbol);
 
-    //Skip '('.
-    tok = ++ch;
-
-    while(*ch != ')'){
+    while(isalpha(*ch)){
+        printf("\nCurrent CHar is %c", *ch);
         insert_into_array(Arry, *ch);
         tok = ++ch;
     }
 
     return createSymbol(array_to_string(Arry));
 }
+
 
 
 Object *make_list(char *ch){
@@ -128,6 +126,8 @@ Object *parse(char* ch){
         return make_string(ch);
     }else if(*ch == '('){
         return make_list(ch);
+    }else if(isalpha(*ch)){
+        return make_symbol(ch);
     }else{
         return parse(++ch);
     }
@@ -148,16 +148,17 @@ Object *eval(Object *exprn){
 void print(Object *result){
     switch(result->type){
 
-    case Integer  : printf("Int is %ld\n", result->Val.integer); break;
-    case Fraction : printf("Fraction is %lf\n", result->Val.fraction); break;
-    case Boolean  : result->Val.boolean ? puts("#t") : puts("#f"); break;
+    case Integer  :
+        printf("Int is %ld\n", result->Val.integer); break;
+    case Fraction :
+        printf("Fraction is %lf\n", result->Val.fraction);break;
+    case Boolean  :
+        printf("Is Boolean : ");
+        result->Val.boolean ? puts("#t\n") : puts("#f\n");break;
     case NIL      : puts("\nnil"); break;
     case String   : puts(result->Val.string); break;
-    case Cons     :
-        print(CAR(result));
-        print(CDR(result));
-        break;
-    default       : puts("\n"); break;
+    case Cons     : print(CAR(result));print(CDR(result));break;
+    case Symbol   : puts(result->Val.symbol); break;
     }
 
 }

@@ -114,8 +114,11 @@ char *array_to_string(Array *arry){
         i++;
     }
 
-    str[arry->size] = '"';
-    str[arry->size+1] = '\0';
+    if(arry->type == String){
+        str[arry->size] = '"';
+        str[arry->size+1] = '\0';
+    }
+
     free_array(arry);
     return str;
 }
