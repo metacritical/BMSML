@@ -30,6 +30,10 @@ char *type_of_token(Type t){
     case Cons:
         type = "Cons";
         break;
+    case Quote:
+        type = "Quote";
+        break;
+
     }
 
     return type;
@@ -106,9 +110,9 @@ double array_to_float(Array *arry){
 }
 
 char *array_to_string(Array *arry){
-    char *str  = malloc(sizeof(char)*arry->size + 2);
-    int i = 0;
+    char *str = malloc(sizeof(char)*arry->size + 2);
 
+    int i = 0;
     while(i <= arry->size-1){
         str[i] = arry->char_array[i];
         i++;

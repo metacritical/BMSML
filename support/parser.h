@@ -41,7 +41,6 @@ Object *make_number(char *ch){
         return createFraction(array_to_float(Arry));
 }
 
-
 Object *make_string(char *ch){
     Array a;
     Array *Arry = create_array(&a, 5, String);
@@ -56,7 +55,6 @@ Object *make_string(char *ch){
     return createString(array_to_string(Arry));
 }
 
-
 Object *make_boolean(char *ch){
     //If the char starts with a #, then it is a boolean
     //Create a true or false object. These are singletons or Atomss.
@@ -70,13 +68,11 @@ Object *make_boolean(char *ch){
     }
 }
 
-
 Object *make_symbol(char *ch){
     Array a;
     Array *Arry = create_array(&a, 5, Symbol);
 
-    while(isalpha(*ch)){
-        printf("\nCurrent CHar is %c", *ch);
+    while( isalnum(*ch) || ispunct(*ch) ){
         insert_into_array(Arry, *ch);
         tok = ++ch;
     }
@@ -84,10 +80,14 @@ Object *make_symbol(char *ch){
     return createSymbol(array_to_string(Arry));
 }
 
+Object *make_quote(char *ch){
+    tok = ++ch;
+    return createQuote(parse(tok));
+}
 
 
 Object *make_list(char *ch){
-    if(*ch == '('){ ++ch; tok = ch;}
+    if(*ch == '('){ ++ch; tok = ch; }
 
     while(*ch == ' '){
         tok = ++ch;
@@ -105,7 +105,6 @@ Object *make_list(char *ch){
 
     return cons(car, cdr);
 }
-
 
 //Generates AST.
 Object *parse(char* ch){
@@ -126,39 +125,54 @@ Object *parse(char* ch){
         return make_string(ch);
     }else if(*ch == '('){
         return make_list(ch);
-    }else if(isalpha(*ch)){
+    }else if(*ch == '\''){
+        return make_quote(ch);
+    }else if( isalnum(*ch) || ispunct(*ch) ){
         return make_symbol(ch);
     }else{
         return parse(++ch);
     }
 }
 
-
 //Evaluation Code.
 Object *eval(Object *exprn){
     printf("\nExpression Type : %s\n", type_of_token(exprn->type));
     if(exprn->type == Cons){
         if(CAR(exprn)->type == NIL && CDR(exprn)->type == NIL)
-            return nullObject();
+            printf("NIL");
     }
 
     return exprn;
 }
 
 void print(Object *result){
+    int printing_cons = 0;
+
     switch(result->type){
 
     case Integer  :
-        printf("Int is %ld\n", result->Val.integer); break;
+        printf("%ld ", result->Val.integer); break;
     case Fraction :
-        printf("Fraction is %lf\n", result->Val.fraction);break;
+        printf("%lf ", result->Val.fraction);break;
     case Boolean  :
-        printf("Is Boolean : ");
-        result->Val.boolean ? puts("#t\n") : puts("#f\n");break;
-    case NIL      : puts("\nnil"); break;
-    case String   : puts(result->Val.string); break;
+        result->Val.boolean ? puts("#t ") : puts("#f ");break;
+    case String   : printf("%s", result->Val.string); break;
     case Cons     : print(CAR(result));print(CDR(result));break;
-    case Symbol   : puts(result->Val.symbol); break;
+    case Symbol   : printf("%s", result->Val.symbol); break;
+    case NIL      : printf("");break;
+    case Quote    :
+        if(CDR(result)->type == Cons){
+            printing_cons = 1;
+
+            print(CAR(result));
+            printf("( ");
+            print(CDR(result));
+            printf(")");
+        }else{
+            print(CAR(result));
+            print(CDR(result));
+        }
+        break;
     }
 
 }
