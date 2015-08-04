@@ -33,7 +33,6 @@ char *type_of_token(Type t){
     case Quote:
         type = "Quote";
         break;
-
     }
 
     return type;

@@ -82,12 +82,15 @@ Object *make_symbol(char *ch){
 
 Object *make_quote(char *ch){
     tok = ++ch;
+    //In my opinion correct way to make quoted expressions
+    //is not this but to read it like a string and keep it that way
+    //until it reaches eval or print stage.
     return createQuote(parse(tok));
 }
 
 
 Object *make_list(char *ch){
-    if(*ch == '('){ ++ch; tok = ch; }
+    if(*ch == '('){ ++ch; tok = ch;}
 
     while(*ch == ' '){
         tok = ++ch;
@@ -139,15 +142,13 @@ Object *eval(Object *exprn){
     printf("\nExpression Type : %s\n", type_of_token(exprn->type));
     if(exprn->type == Cons){
         if(CAR(exprn)->type == NIL && CDR(exprn)->type == NIL)
-            printf("NIL");
+            return nullObject();
     }
 
     return exprn;
 }
 
 void print(Object *result){
-    int printing_cons = 0;
-
     switch(result->type){
 
     case Integer  :
@@ -155,23 +156,21 @@ void print(Object *result){
     case Fraction :
         printf("%lf ", result->Val.fraction);break;
     case Boolean  :
-        result->Val.boolean ? puts("#t ") : puts("#f ");break;
+        result->Val.boolean ? puts("T") : puts("F");break;
     case String   : printf("%s", result->Val.string); break;
     case Cons     : print(CAR(result));print(CDR(result));break;
     case Symbol   : printf("%s", result->Val.symbol); break;
-    case NIL      : printf("");break;
     case Quote    :
         if(CDR(result)->type == Cons){
-            printing_cons = 1;
-
-            print(CAR(result));
             printf("( ");
             print(CDR(result));
             printf(")");
         }else{
-            print(CAR(result));
             print(CDR(result));
         }
+        break;
+    case NIL:
+        printf("NIL");
         break;
     }
 
