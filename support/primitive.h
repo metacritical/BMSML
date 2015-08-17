@@ -6,7 +6,7 @@
 #define NEGATIVE -1
 
 //Defining Token types in lisp
-typedef enum { NIL, Integer, Fraction, String, Boolean, Symbol, Cons, Quote } Type;
+typedef enum { NIL, Integer, Fraction, String, Boolean, Symbol, Cons } Type;
 
 typedef struct Object{
     int line_number;
@@ -96,12 +96,7 @@ Object *createSymbol(char *sym){
     return this;
 }
 
-Object *createQuote(Object *quoted){
-    Object *this = createCell();
-    this->type = Quote;
-    this->Val.Cell.car->type = Symbol;
-    this->Val.Cell.car->Val.symbol = "'";
-    this->Val.Cell.cdr->type = Cons;
-    this->Val.Cell.cdr = quoted;
+Object *createQuote(void){
+    Object *this = createSymbol("quote");
     return this;
 }

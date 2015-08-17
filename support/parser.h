@@ -82,10 +82,8 @@ Object *make_symbol(char *ch){
 
 Object *make_quote(char *ch){
     tok = ++ch;
-    //In my opinion correct way to make quoted expressions
-    //is not this but to read it like a string and keep it that way
-    //until it reaches eval or print stage.
-    return createQuote(parse(tok));
+    Object *car = createQuote();
+    return cons(car, parse(tok));
 }
 
 
@@ -96,7 +94,7 @@ Object *make_list(char *ch){
         tok = ++ch;
     }
 
-    if(*ch == ')') return nullObject();
+    if(*ch == ')') return cons(nullObject() , parse(++ch));
 
     Object *car = parse(ch);
 
@@ -118,7 +116,7 @@ Object *parse(char* ch){
     }
 
     //Return NIL if ')' or EOF is encountered.
-    if(*ch == ')' || *ch == '\0') return nullObject();
+    if(*ch == ')' || *ch == '\0') return createCell();
 
     if( isdigit(*ch)){
         return make_number(ch);
@@ -160,18 +158,12 @@ void print(Object *result){
     case String   : printf("%s", result->Val.string); break;
     case Cons     : print(CAR(result));print(CDR(result));break;
     case Symbol   : printf("%s", result->Val.symbol); break;
-    case Quote    :
-        if(CDR(result)->type == Cons){
-            printf("( ");
-            print(CDR(result));
-            printf(")");
-        }else{
-            print(CDR(result));
-        }
-        break;
     case NIL:
-        printf("NIL");
-        break;
+        if(CAR(result) && CDR(result)){
+            if(CAR(result)->type == NIL && CDR(result)->type == NIL)
+                printf("NIL");
+            break;
+        }
     }
 
 }
