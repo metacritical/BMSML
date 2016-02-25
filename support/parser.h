@@ -116,7 +116,7 @@ Object *parse(char* ch){
     }
 
     //Return NIL if ')' or EOF is encountered.
-    if(*ch == ')' || *ch == '\0') return createCell();
+    if(*ch == ')' || *ch == '\0') return createNIL();
 
     if( isdigit(*ch)){
         return make_number(ch);
@@ -138,11 +138,6 @@ Object *parse(char* ch){
 //Evaluation Code.
 Object *eval(Object *exprn){
     printf("\nExpression Type : %s\n", type_of_token(exprn->type));
-    if(exprn->type == Cons){
-        if(CAR(exprn)->type == NIL && CDR(exprn)->type == NIL)
-            return nullObject();
-    }
-
     return exprn;
 }
 
@@ -165,5 +160,4 @@ void print(Object *result){
             break;
         }
     }
-
 }

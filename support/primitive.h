@@ -53,6 +53,13 @@ Object *nullObject(void){
     return this;
 }
 
+Object *createNIL(void){
+    Object *this = createObject();
+    this->type = NIL;
+    this->Val.nil = NULL;
+    return this;
+}
+
 //Empty Cell
 Object *createCell(void) {
     Object *this = nullObject();
