@@ -12,7 +12,9 @@ int main(int argc, char** argv) {
 
         if(*line == '\0') continue;
 
-        if ( !strcmp( line , "(exit)" ) || !strcmp( line , "(quit)")){
+        if ( !strcmp( line , "(exit)" ) 
+	     || !strcmp( line , "(quit)")
+	     || !strcmp( line , ",q")){
             puts("Andu-falah-dor!"); //Darnassian for 'Let Balance be restored!'
             break;
         }else{
