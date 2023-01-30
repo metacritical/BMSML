@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h> //To get free() memory function.
 #include <stdbool.h> //For Boolean bool true false macros.
-#include "support/support.h"
+#include "src/support.h"
 
 int main(int argc, char** argv) {
     print_banner();
